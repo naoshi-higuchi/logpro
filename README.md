@@ -1,0 +1,2 @@
+# logpro
+Logic programing library.
