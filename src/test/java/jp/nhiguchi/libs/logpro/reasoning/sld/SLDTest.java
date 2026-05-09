@@ -521,10 +521,23 @@ public class SLDTest {
 		solveAllAndAssert(program, query, expResult);
 	}
 
+	@Test
+	public void testSolveOne_noSolution() {
+		// ann is parent of cate, not bob — query must fail
+		assertNull(SLD.solveOne(fProgFamily, query("?- parent(ann, bob).")));
+	}
+
+	@Test
+	public void testSolveAll_noSolution() {
+		Set<Map<Variable, Term>> empty = Collections.emptySet();
+		assertEquals(empty, SLD.solveAll(fProgFamily, query("?- parent(ann, bob).")));
+		assertEquals(empty, SLD.solveAll(fProgFamily, query("?- parent(ann, bob)."), fExecSrv));
+	}
+
 	/**
 	 * Test of solveAll method, of class SLD.
 	 */
-	//@Test
+	@Test
 	public void testSolveAll_Program_Clause_with0ArgLiteral() {
 		System.out.println("solveAll");
 		Program program;
@@ -533,7 +546,12 @@ public class SLDTest {
 
 		program = fProgWith0ArgLiteral;
 		query = query("?- literalWith0Arg.");
-		expResult = new HashSet<Map<Variable, Term>>();
+		// A ground query with no variables that succeeds yields one empty substitution
+		expResult = new HashSet<Map<Variable, Term>>() {
+			{
+				add(new HashMap<Variable, Term>());
+			}
+		};
 		solveAllAndAssert(program, query, expResult);
 	}
 }

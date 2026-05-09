@@ -68,4 +68,51 @@ public class ResolutionTest {
 		assertEquals(goal, result.get2nd().getGoal());
 		assertEquals(expMGU, result.get2nd().getMGU());
 	}
+
+	@Test
+	public void testResolve_mguFail_atomMismatch() {
+		Goal goal = Goal.newInitialGoal(query("?- p(a)."));
+		Clause inputClause = clause("p(b) :- q(b).");
+		assertNull(Resolution.resolve(goal, inputClause, null));
+	}
+
+	@Test
+	public void testResolve_mguFail_predicateMismatch() {
+		Goal goal = Goal.newInitialGoal(query("?- p(X)."));
+		Clause inputClause = clause("q(a) :- r(a).");
+		assertNull(Resolution.resolve(goal, inputClause, null));
+	}
+
+	@Test
+	public void testResolve_factClause() {
+		Goal goal = Goal.newInitialGoal(query("?- p(X), q(X)."));
+		Clause inputClause = fact("p(a).");
+		Goal expResolvent = Goal.newGoal(query("?- q(a)."), null);
+		Map<Variable, Term> expMGU = new HashMap<Variable, Term>() {
+			{
+				put(variable("X"), term("a"));
+			}
+		};
+		Pair<Goal, Resolution> result = Resolution.resolve(goal, inputClause, null);
+		assertNotNull(result);
+		assertEquals(expResolvent, result.get1st());
+		assertEquals(goal, result.get2nd().getGoal());
+		assertEquals(expMGU, result.get2nd().getMGU());
+	}
+
+	@Test
+	public void testResolve_singleLiteralGoalWithRule() {
+		Goal goal = Goal.newInitialGoal(query("?- p(X)."));
+		Clause inputClause = clause("p(a) :- q(a).");
+		Goal expResolvent = Goal.newGoal(query("?- q(a)."), null);
+		Map<Variable, Term> expMGU = new HashMap<Variable, Term>() {
+			{
+				put(variable("X"), term("a"));
+			}
+		};
+		Pair<Goal, Resolution> result = Resolution.resolve(goal, inputClause, null);
+		assertNotNull(result);
+		assertEquals(expResolvent, result.get1st());
+		assertEquals(expMGU, result.get2nd().getMGU());
+	}
 }
