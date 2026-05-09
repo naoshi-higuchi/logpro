@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package jp.nhiguchi.libs.logpro.reasoning.sld;
 
 import java.util.Objects;
@@ -9,10 +5,6 @@ import jp.nhiguchi.libs.flist.*;
 
 import jp.nhiguchi.libs.logpro.program.formula.*;
 
-/**
- *
- * @author Naoshi Higuchi
- */
 final class SLDBranch {
 	private final Goal fGoal;
 	private final Stack fStack;
@@ -26,11 +18,7 @@ final class SLDBranch {
 	}
 
 	static SLDBranch newSLDBranch(Goal goal, Stack stack, FList<Clause> inputClauses) {
-		if (goal == null || stack == null) {
-			throw new IllegalArgumentException();
-			// inputClauses may be null.
-		}
-
+		if (goal == null || stack == null) throw new IllegalArgumentException();
 		return new SLDBranch(goal, stack, inputClauses);
 	}
 
@@ -59,20 +47,17 @@ final class SLDBranch {
 	}
 
 	boolean isForkSuppressiveZone() {
-		return fGoal.peek().isForkSuppressiveZone();
+		return fGoal.peek().forkSuppressiveZone();
 	}
 
 	@Override
 	public boolean equals(Object obj) {
-		if (obj == null) return false;
 		if (obj == this) return true;
-		if (!(obj instanceof SLDBranch)) return false;
-
-		SLDBranch rhs = (SLDBranch) obj;
+		if (!(obj instanceof SLDBranch rhs)) return false;
 
 		return Objects.equals(fGoal, rhs.fGoal)
 				&& Objects.equals(fStack, rhs.fStack)
-				&& Objects.equals(fInputClauses, fInputClauses);
+				&& Objects.equals(fInputClauses, rhs.fInputClauses); // fixed: was comparing fInputClauses to itself
 	}
 
 	@Override
@@ -85,9 +70,7 @@ final class SLDBranch {
 	@Override
 	public String toString() {
 		if (isNULL()) return "SLDBranch.NULL";
-
-		return String.format(
-				"SLDBranch(\ngoal=%s,\nstack=%s,\ninputClauses=%s)",
+		return "SLDBranch(\ngoal=%s,\nstack=%s,\ninputClauses=%s)".formatted(
 				fGoal, fStack, fInputClauses);
 	}
 }

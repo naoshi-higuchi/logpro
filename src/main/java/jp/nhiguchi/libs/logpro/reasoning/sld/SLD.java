@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package jp.nhiguchi.libs.logpro.reasoning.sld;
 
 import java.util.*;
@@ -17,13 +13,8 @@ import static jp.nhiguchi.libs.logpro.reasoning.sld.Solver.Solution;
 
 /**
  * Selective Linear Definite clause resolution.
- *
- * @author Naoshi Higuchi
  */
 public final class SLD {
-	/**
-	 * Computed Answer Substitutions
-	 */
 	private static class CASes implements Iterable<Map<Variable, Term>> {
 		private final Iterator<Map<Variable, Term>> fIterator;
 
@@ -31,6 +22,7 @@ public final class SLD {
 			fIterator = new CASIterator(program, tree);
 		}
 
+		@Override
 		public Iterator<Map<Variable, Term>> iterator() {
 			return fIterator;
 		}
@@ -44,69 +36,46 @@ public final class SLD {
 		private CASIterator(Program program, FList<SLDBranch> tree) {
 			fProgram = program;
 			fTree = tree;
-			fNext = null;
 		}
 
+		@Override
 		public boolean hasNext() {
 			if (fNext != null) return true;
 
-			Solution sol;
-			sol = Solver.solve(fProgram, fTree);
-
+			var sol = Solver.solve(fProgram, fTree);
 			if (sol == null) return false;
 
-			fNext = sol.getCAS();
-			fTree = sol.getRestTree();
-
+			fNext = sol.cas();
+			fTree = sol.restTree();
 			return true;
 		}
 
+		@Override
 		public Map<Variable, Term> next() {
 			if (!hasNext()) throw new NoSuchElementException();
-
-			Map<Variable, Term> res = fNext;
+			var res = fNext;
 			fNext = null;
-
 			return res;
 		}
 
+		@Override
 		public void remove() {
 			throw new UnsupportedOperationException("Not supported.");
 		}
 	}
 
 	public static Iterable<Map<Variable, Term>> solve(Program program, Clause query) {
-		FList<SLDBranch> initTree = Solver.getInitialTree(query);
-		return new CASes(program, initTree);
+		return new CASes(program, Solver.getInitialTree(query));
 	}
 
-	/**
-	 *
-	 * @param program
-	 * @param query
-	 * @return A CAS(Computed Answer Substitution). null, if no answer is found.
-	 */
 	public static Map<Variable, Term> solveOne(Program program, Clause query) {
-		Iterator<Map<Variable, Term>> it = solve(program, query).iterator();
-		if (!it.hasNext()) return null;
-
-		return it.next();
+		var it = solve(program, query).iterator();
+		return it.hasNext() ? it.next() : null;
 	}
 
-	/**
-	 *
-	 * @param program
-	 * @param query
-	 * @return A set of CASes(Computed Answer Substitutions). An empty set, if
-	 * no answer is found.
-	 */
 	public static Set<Map<Variable, Term>> solveAll(Program program, Clause query) {
-		Set<Map<Variable, Term>> cases = new HashSet<Map<Variable, Term>>();
-
-		for (Map<Variable, Term> cas : solve(program, query)) {
-			cases.add(cas);
-		}
-
+		var cases = new HashSet<Map<Variable, Term>>();
+		for (var cas : solve(program, query)) cases.add(cas);
 		return cases;
 	}
 

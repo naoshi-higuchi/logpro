@@ -4,114 +4,37 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.concurrent.*;
 
-/**
- *
- * @author naoshi
- */
 public final class BlockingLIFOQueue<E> implements BlockingQueue<E> {
-	private final BlockingDeque<E> fDeque = new LinkedBlockingDeque();
+	private final BlockingDeque<E> fDeque = new LinkedBlockingDeque<>();
 
-	public boolean add(E e) {
-		fDeque.addFirst(e);
-		return true;
-	}
+	@Override public boolean add(E e)                                          { fDeque.addFirst(e); return true; }
+	@Override public boolean offer(E e)                                        { return fDeque.offerFirst(e); }
+	@Override public void put(E e) throws InterruptedException                 { fDeque.putFirst(e); }
+	@Override public boolean offer(E e, long t, TimeUnit u) throws InterruptedException { return fDeque.offerFirst(e, t, u); }
+	@Override public E take() throws InterruptedException                      { return fDeque.takeFirst(); }
+	@Override public E poll(long t, TimeUnit u) throws InterruptedException    { return fDeque.pollFirst(t, u); }
+	@Override public int remainingCapacity()                                   { return fDeque.remainingCapacity(); }
+	@Override public boolean remove(Object o)                                  { return fDeque.removeFirstOccurrence(o); }
+	@Override public boolean contains(Object o)                                { return fDeque.contains(o); }
+	@Override public int drainTo(Collection<? super E> c)                     { return fDeque.drainTo(c); }
+	@Override public int drainTo(Collection<? super E> c, int max)            { return fDeque.drainTo(c, max); }
+	@Override public E remove()                                                { return fDeque.removeFirst(); }
+	@Override public E poll()                                                  { return fDeque.pollFirst(); }
+	@Override public E element()                                               { return fDeque.element(); }
+	@Override public E peek()                                                  { return fDeque.peekFirst(); }
+	@Override public int size()                                                { return fDeque.size(); }
+	@Override public boolean isEmpty()                                         { return fDeque.isEmpty(); }
+	@Override public Iterator<E> iterator()                                    { return fDeque.iterator(); }
+	@Override public Object[] toArray()                                        { return fDeque.toArray(); }
+	@Override public <T> T[] toArray(T[] a)                                   { return fDeque.toArray(a); }
+	@Override public boolean containsAll(Collection<?> c)                      { return fDeque.containsAll(c); }
+	@Override public boolean removeAll(Collection<?> c)                        { return fDeque.removeAll(c); }
+	@Override public boolean retainAll(Collection<?> c)                        { return fDeque.retainAll(c); }
+	@Override public void clear()                                              { fDeque.clear(); }
 
-	public boolean offer(E e) {
-		return fDeque.offerFirst(e);
-	}
-
-	public void put(E e) throws InterruptedException {
-		fDeque.putFirst(e);
-	}
-
-	public boolean offer(E e, long timeout, TimeUnit unit) throws InterruptedException {
-		return fDeque.offerFirst(e, timeout, unit);
-	}
-
-	public E take() throws InterruptedException {
-		return fDeque.takeFirst();
-	}
-
-	public E poll(long timeout, TimeUnit unit) throws InterruptedException {
-		return fDeque.pollFirst(timeout, unit);
-	}
-
-	public int remainingCapacity() {
-		return fDeque.remainingCapacity();
-	}
-
-	public boolean remove(Object o) {
-		return fDeque.removeFirstOccurrence(o);
-	}
-
-	public boolean contains(Object o) {
-		return fDeque.contains(o);
-	}
-
-	public int drainTo(Collection<? super E> c) {
-		return fDeque.drainTo(c);
-	}
-
-	public int drainTo(Collection<? super E> c, int maxElements) {
-		return fDeque.drainTo(c, maxElements);
-	}
-
-	public E remove() {
-		return fDeque.removeFirst();
-	}
-
-	public E poll() {
-		return fDeque.pollFirst();
-	}
-
-	public E element() {
-		return fDeque.element();
-	}
-
-	public E peek() {
-		return fDeque.peekFirst();
-	}
-
-	public int size() {
-		return fDeque.size();
-	}
-
-	public boolean isEmpty() {
-		return fDeque.isEmpty();
-	}
-
-	public Iterator<E> iterator() {
-		return fDeque.iterator();
-	}
-
-	public Object[] toArray() {
-		return fDeque.toArray();
-	}
-
-	public <T> T[] toArray(T[] a) {
-		return fDeque.toArray(a);
-	}
-
-	public boolean containsAll(Collection<?> c) {
-		return fDeque.containsAll(c);
-	}
-
+	@Override
 	public boolean addAll(Collection<? extends E> c) {
-		for (E e : c) {
-			fDeque.addFirst(e);
-		}
+		for (var e : c) fDeque.addFirst(e);
 		return true;
-	}
-
-	public boolean removeAll(Collection<?> c) {
-		return fDeque.removeAll(c);
-	}
-
-	public boolean retainAll(Collection<?> c) {
-		return fDeque.retainAll(c);
-	}
-
-	public void clear() {
-		fDeque.clear();
 	}
 }

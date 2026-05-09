@@ -1,35 +1,24 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package jp.nhiguchi.libs.logpro.program.formula;
 
 import java.util.*;
 
 import jp.nhiguchi.libs.logpro.program.term.*;
 
-/**
- *
- * @author Naoshi Higuchi
- */
 public final class Predicate {
-	public static enum Type {
+	public enum Type {
 		NORMAL, SPECIAL, CUT
 	}
 
-	/**
-	 * @param args
-	 * @return a Pair of resolvent and MGU. null if failed.
-	 */
-	public static interface Evaluable {
-		public static interface Eval {
-			public Clause getResolvent();
-
-			public Map<Variable, ? extends Term> getMGU();
+	@FunctionalInterface
+	public interface Evaluable {
+		interface Eval {
+			Clause getResolvent();
+			Map<Variable, ? extends Term> getMGU();
 		}
 
-		public Eval eval(List<? extends Term> args);
+		Eval eval(List<? extends Term> args);
 	}
+
 	private final String fName;
 	private final int fArity;
 	private final Type fType;
@@ -69,11 +58,6 @@ public final class Predicate {
 		return fType;
 	}
 
-	/**
-	 * @param args
-	 * @return a Pair of next goal and MGU. null if failed.
-	 * @throws UnsupportedOperationException if predicate's type is not SPECIAL.
-	 */
 	Evaluable.Eval eval(List<? extends Term> args) {
 		if (fEvaluable == null) {
 			throw new UnsupportedOperationException(
@@ -85,28 +69,25 @@ public final class Predicate {
 
 	@Override
 	public boolean equals(Object obj) {
-		if (obj == null) return false;
 		if (obj == this) return true;
-		if (!(obj instanceof Predicate)) return false;
-
-		Predicate rhs = (Predicate) obj;
+		if (!(obj instanceof Predicate rhs)) return false;
 
 		return Objects.equals(fName, rhs.fName)
-				&& Objects.equals(fArity, rhs.fArity)
-				&& Objects.equals(fType, rhs.fType)
+				&& fArity == rhs.fArity
+				&& fType == rhs.fType
 				&& Objects.equals(fEvaluable, rhs.fEvaluable);
 	}
 
 	@Override
 	public int hashCode() {
 		return Objects.hashCode(fName)
-				+ Objects.hashCode(fArity)
+				+ Integer.hashCode(fArity)
 				+ Objects.hashCode(fType)
 				+ Objects.hashCode(fEvaluable);
 	}
 
 	@Override
 	public String toString() {
-		return String.format("%s^%d", fName, fArity);
+		return "%s^%d".formatted(fName, fArity);
 	}
 }

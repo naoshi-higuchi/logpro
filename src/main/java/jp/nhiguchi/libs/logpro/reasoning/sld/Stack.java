@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package jp.nhiguchi.libs.logpro.reasoning.sld;
 
 import java.util.*;
@@ -9,11 +5,6 @@ import java.util.*;
 import jp.nhiguchi.libs.flist.*;
 import jp.nhiguchi.libs.logpro.program.formula.*;
 
-/**
- * Immutable.
- *
- * @author Naoshi Higuchi
- */
 final class Stack implements Iterable<Resolution> {
 	private static class StackElem {
 		private final Resolution fResolution;
@@ -26,51 +17,23 @@ final class Stack implements Iterable<Resolution> {
 
 		@Override
 		public boolean equals(Object obj) {
-			if (obj == null) return false;
 			if (obj == this) return true;
-			if (!(obj instanceof StackElem)) return false;
-
-			StackElem rhs = (StackElem) obj;
-
+			if (!(obj instanceof StackElem rhs)) return false;
 			return Objects.equals(fResolution, rhs.fResolution)
-					&& Objects.equals(fLoopHash, rhs.fLoopHash);
+					&& fLoopHash == rhs.fLoopHash;
 		}
 
 		@Override
 		public int hashCode() {
-			return Objects.hashCode(fResolution)
-					+ Objects.hashCode(fLoopHash);
+			return Objects.hashCode(fResolution) + Integer.hashCode(fLoopHash);
 		}
 
 		@Override
 		public String toString() {
-			return String.format("[resolution=%s, loopHash=%d", fResolution, fLoopHash);
+			return "[resolution=%s, loopHash=%d".formatted(fResolution, fLoopHash);
 		}
 	}
 
-	private static class IteratorImpl implements Iterator<Resolution> {
-		private final Iterator<StackElem> fIt;
-
-		private IteratorImpl(Iterator<StackElem> it) {
-			fIt = it;
-		}
-
-		public boolean hasNext() {
-			return fIt.hasNext();
-		}
-
-		public Resolution next() {
-			if (!fIt.hasNext()) throw new NoSuchElementException();
-
-			StackElem se = fIt.next();
-
-			return se.fResolution;
-		}
-
-		public void remove() {
-			throw new UnsupportedOperationException("Immutable.");
-		}
-	}
 	private final FList<StackElem> fElems;
 
 	private Stack(FList<StackElem> elems) {
@@ -78,15 +41,12 @@ final class Stack implements Iterable<Resolution> {
 	}
 
 	public static Stack emptyStack() {
-		FList<StackElem> empty = FList.flist();
-		return new Stack(empty);
+		return new Stack(FList.flist());
 	}
 
 	private static int getLoopHash(Goal goal) {
-		FList<AtomicFormula> subGoals = goal.toSubGoals();
-		if (subGoals.isEmpty()) return 0;
-
-		return subGoals.head().predicate().hashCode();
+		var subGoals = goal.toSubGoals();
+		return subGoals.isEmpty() ? 0 : subGoals.head().predicate().hashCode();
 	}
 
 	public Stack push(Resolution resolution) {
@@ -94,45 +54,31 @@ final class Stack implements Iterable<Resolution> {
 	}
 
 	public Resolution peek() {
-		if (fElems.isEmpty()) return null;
-
-		return fElems.head().fResolution;
+		return fElems.isEmpty() ? null : fElems.head().fResolution;
 	}
 
-	/**
-	 *
-	 * @return An iterator which iterates from the bottom to the top.
-	 */
+	/** Iterates from the bottom to the top. */
 	@Override
 	public Iterator<Resolution> iterator() {
-		return new IteratorImpl(fElems.reverse().iterator());
+		return new MappedIterator(fElems.reverse().iterator());
 	}
 
-	/**
-	 *
-	 * @return An iterator which iterates from the top to the bottom.
-	 */
+	/** Iterates from the top to the bottom. */
 	public Iterator<Resolution> descendingIterator() {
-		return new IteratorImpl(fElems.iterator());
+		return new MappedIterator(fElems.iterator());
 	}
 
 	public boolean isLoop(Goal goal) {
-		if (fElems.isEmpty()) return false;
-		if (goal.toSubGoals().isEmpty()) return false;
+		if (fElems.isEmpty() || goal.toSubGoals().isEmpty()) return false;
 
 		int hash = getLoopHash(goal);
-		FList<AtomicFormula> subGoals = goal.toSubGoals();
+		var subGoals = goal.toSubGoals();
 
-		for (StackElem se : fElems) {
+		for (var se : fElems) {
 			if (hash == se.fLoopHash) {
-				FList<AtomicFormula> seSubGoals = se.fResolution.getGoal().toSubGoals();
-
+				var seSubGoals = se.fResolution.getGoal().toSubGoals();
 				if (subGoals.size() < seSubGoals.size()) continue;
-
-				AtomicFormula subGoal = subGoals.head();
-				AtomicFormula seSubGoal = seSubGoals.head();
-
-				if (Util.isAlphaEquivalent(subGoal, seSubGoal)) return true;
+				if (Util.isAlphaEquivalent(subGoals.head(), seSubGoals.head())) return true;
 			}
 		}
 
@@ -141,12 +87,8 @@ final class Stack implements Iterable<Resolution> {
 
 	@Override
 	public boolean equals(Object obj) {
-		if (obj == null) return false;
 		if (obj == this) return true;
-		if (!(obj instanceof Stack)) return false;
-
-		Stack rhs = (Stack) obj;
-
+		if (!(obj instanceof Stack rhs)) return false;
 		return Objects.equals(fElems, rhs.fElems);
 	}
 
@@ -157,17 +99,35 @@ final class Stack implements Iterable<Resolution> {
 
 	@Override
 	public String toString() {
-		StringBuilder sb = new StringBuilder();
-		Iterator<StackElem> it = fElems.iterator();
-		while (it.hasNext()) {
-			if (sb.length() == 0) {
-				sb.append("Stack(");
-			} else {
-				sb.append('\n');
-			}
-			sb.append(it.next().toString());
+		var sb = new StringBuilder();
+		for (var se : fElems) {
+			if (!sb.isEmpty()) sb.append('\n');
+			sb.append(se);
 		}
-		sb.append(")");
-		return sb.toString();
+		return "Stack(%s)".formatted(sb);
+	}
+
+	private static final class MappedIterator implements Iterator<Resolution> {
+		private final Iterator<StackElem> fIt;
+
+		private MappedIterator(Iterator<StackElem> it) {
+			fIt = it;
+		}
+
+		@Override
+		public boolean hasNext() {
+			return fIt.hasNext();
+		}
+
+		@Override
+		public Resolution next() {
+			if (!fIt.hasNext()) throw new NoSuchElementException();
+			return fIt.next().fResolution;
+		}
+
+		@Override
+		public void remove() {
+			throw new UnsupportedOperationException("Immutable.");
+		}
 	}
 }

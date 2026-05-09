@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package jp.nhiguchi.libs.logpro.reasoning.sld;
 
 import java.util.*;
@@ -12,31 +8,23 @@ import jp.nhiguchi.libs.tuple.*;
 import jp.nhiguchi.libs.logpro.program.formula.*;
 import jp.nhiguchi.libs.logpro.program.term.*;
 
-/**
- *
- * @author Naoshi Higuchi
- */
 final class Instances {
 	static AtomicFormula getInstance(AtomicFormula literal, Pair<Variable, ? extends Term> subst) {
-		Map<Variable, Term> s = new HashMap<Variable, Term>();
+		var s = new HashMap<Variable, Term>();
 		s.put(subst.get1st(), subst.get2nd());
-
 		return getInstance(literal, s);
 	}
 
 	static Clause getInstance(Clause clause, Map<Variable, ? extends Term> subst) {
-		assert (clause != null && subst != null);
-
-		AtomicFormula head = clause.head();
-		FList<AtomicFormula> body = clause.body();
+		assert clause != null && subst != null;
 
 		return Clause.clause(
-				getInstance(head, subst),
-				getInstanceOfLiterals(body, subst));
+				getInstance(clause.head(), subst),
+				getInstanceOfLiterals(clause.body(), subst));
 	}
 
 	static AtomicFormula getInstance(AtomicFormula literal, Map<Variable, ? extends Term> subst) {
-		assert (subst != null);
+		assert subst != null;
 		if (literal == null) return null;
 
 		return AtomicFormula.create(
@@ -44,62 +32,48 @@ final class Instances {
 				getInstance(literal.args(), subst));
 	}
 
-	static FList<AtomicFormula> getInstanceOfLiterals(FList<AtomicFormula> lits, Map<Variable, ? extends Term> subst) {
-		assert (lits != null && subst != null);
+	static FList<AtomicFormula> getInstanceOfLiterals(
+			FList<AtomicFormula> lits, Map<Variable, ? extends Term> subst) {
+		assert lits != null && subst != null;
 
 		if (lits.isEmpty()) return lits;
 
-		AtomicFormula lit = lits.head();
-		FList<AtomicFormula> rest = lits.tail();
-
 		return FList.cons(
-				getInstance(lit, subst),
-				getInstanceOfLiterals(rest, subst));
+				getInstance(lits.head(), subst),
+				getInstanceOfLiterals(lits.tail(), subst));
 	}
 
-	static FList<? extends Term> getInstance(FList<? extends Term> terms, Map<Variable, ? extends Term> subst) {
-		assert (terms != null && subst != null);
+	// NOTE: sequential ifs are intentional — a Variable may substitute to a CompoundTerm,
+	// requiring both transformations on the resulting value.
+	static FList<? extends Term> getInstance(
+			FList<? extends Term> terms, Map<Variable, ? extends Term> subst) {
+		assert terms != null && subst != null;
 
 		if (terms.isEmpty()) return terms;
 
 		Term t = terms.head();
-		FList<? extends Term> rest = terms.tail();
+		var rest = terms.tail();
 
-		if (t instanceof Variable) {
-			Variable v = (Variable) t;
+		if (t instanceof Variable v) {
 			t = getInstance(v, subst);
 		}
-		if (t instanceof CompoundTerm) {
-			CompoundTerm ct = (CompoundTerm) t;
-			t = CompoundTerm.create(
-					ct.functor(),
-					getInstance(ct.args(), subst));
+		if (t instanceof CompoundTerm ct) {
+			t = CompoundTerm.create(ct.functor(), getInstance(ct.args(), subst));
 		}
 
 		return FList.cons(t, getInstance(rest, subst));
 	}
 
 	static Term getInstance(Variable var, Map<Variable, ? extends Term> subst) {
-		assert (var != null && subst != null);
+		assert var != null && subst != null;
 
-		Term res = var;
-
-		if (subst.containsKey(var)) {
-			res = subst.get(var);
-		}
-
-		return res;
+		var res = subst.get(var);
+		return (res != null) ? res : var;
 	}
 
 	static Term getInstance(Variable var, Pair<Variable, ? extends Term> subst) {
-		assert (var != null && subst != null);
+		assert var != null && subst != null;
 
-		Term res = var;
-
-		if (subst.get1st().equals(var)) {
-			res = subst.get2nd();
-		}
-
-		return res;
+		return subst.get1st().equals(var) ? subst.get2nd() : var;
 	}
 }

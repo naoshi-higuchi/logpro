@@ -1,18 +1,9 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package jp.nhiguchi.libs.logpro.program.formula;
 
 import java.util.*;
 
 import jp.nhiguchi.libs.flist.*;
 
-/**
- * Immutable.
- *
- * @author Naoshi Higuchi
- */
 public final class Clause {
 	private final AtomicFormula fHead;
 	private final FList<AtomicFormula> fBody;
@@ -31,8 +22,7 @@ public final class Clause {
 	}
 
 	public static Clause clause(AtomicFormula head, List<AtomicFormula> body) {
-		FList<AtomicFormula> fbody = FList.flist(body);
-		return new Clause(head, fbody);
+		return new Clause(head, FList.flist(body));
 	}
 
 	public static Clause clause(AtomicFormula head, AtomicFormula... body) {
@@ -48,8 +38,7 @@ public final class Clause {
 	}
 
 	public static Clause query(List<AtomicFormula> body) {
-		FList<AtomicFormula> fbody = FList.flist(body);
-		return new Clause(null, fbody);
+		return new Clause(null, FList.flist(body));
 	}
 
 	public static Clause query(AtomicFormula... body) {
@@ -78,11 +67,8 @@ public final class Clause {
 
 	@Override
 	public boolean equals(Object obj) {
-		if (obj == null) return false;
 		if (obj == this) return true;
-		if (!(obj instanceof Clause)) return false;
-
-		Clause rhs = (Clause) obj;
+		if (!(obj instanceof Clause rhs)) return false;
 
 		return Objects.equals(fHead, rhs.fHead)
 				&& Objects.equals(fBody, rhs.fBody);
@@ -90,17 +76,13 @@ public final class Clause {
 
 	@Override
 	public int hashCode() {
-		return Objects.hashCode(fHead)
-				+ Objects.hashCode(fBody);
+		return Objects.hashCode(fHead) + Objects.hashCode(fBody);
 	}
 
 	@Override
 	public String toString() {
-		if (fHead == null)
-			return String.format("?- %s.", fBody.toStringWithoutBrackets());
-
-		if (fBody.isEmpty()) return String.format("%s.", fHead);
-
-		return String.format("%s :- %s.", fHead, fBody.toStringWithoutBrackets());
+		if (fHead == null) return "?- %s.".formatted(fBody.toStringWithoutBrackets());
+		if (fBody.isEmpty()) return "%s.".formatted(fHead);
+		return "%s :- %s.".formatted(fHead, fBody.toStringWithoutBrackets());
 	}
 }

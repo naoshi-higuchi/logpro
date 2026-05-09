@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package jp.nhiguchi.libs.logpro.reasoning.sld;
 
 import java.util.*;
@@ -13,64 +9,14 @@ import jp.nhiguchi.libs.tuple.*;
 import jp.nhiguchi.libs.logpro.program.formula.*;
 import jp.nhiguchi.libs.logpro.program.term.*;
 
-/**
- *
- * @author Naoshi Higuchi
- */
 final class Goal implements Iterable<Goal.Entry> {
-	static class Entry {
-		private final AtomicFormula fSubGoal;
-		private final SLDBranch fCutPoint;
-		private final boolean fForkSuppressiveZone;
-
-		private Entry(AtomicFormula subGoal, SLDBranch cutPoint,
-				boolean forkSuppressiveZone) {
-			assert (subGoal != null);
-			assert (cutPoint == null ? true : subGoal.isCut());
-
-			fSubGoal = subGoal;
-			fCutPoint = cutPoint;
-			fForkSuppressiveZone = forkSuppressiveZone;
-		}
-
-		AtomicFormula getSubGoal() {
-			return fSubGoal;
-		}
-
-		SLDBranch getCutPoint() {
-			return fCutPoint;
-		}
-
-		boolean isForkSuppressiveZone() {
-			return fForkSuppressiveZone;
-		}
-
-		@Override
-		public boolean equals(Object obj) {
-			if (obj == null) return false;
-			if (obj == this) return true;
-			if (!(obj instanceof Entry)) return false;
-
-			Entry rhs = (Entry) obj;
-
-			return Objects.equals(fSubGoal, rhs.fSubGoal)
-					&& Objects.equals(fCutPoint, rhs.fCutPoint)
-					&& Objects.equals(fForkSuppressiveZone, rhs.fForkSuppressiveZone);
-		}
-
-		@Override
-		public int hashCode() {
-			return Objects.hashCode(fSubGoal)
-					+ Objects.hashCode(fCutPoint)
-					+ Objects.hashCode(fForkSuppressiveZone);
-		}
-
-		@Override
-		public String toString() {
-			return String.format("<%s, %s, %s>",
-					fSubGoal, fCutPoint, fForkSuppressiveZone);
+	record Entry(AtomicFormula subGoal, SLDBranch cutPoint, boolean forkSuppressiveZone) {
+		Entry {
+			assert subGoal != null;
+			assert cutPoint == null || subGoal.isCut();
 		}
 	}
+
 	private final FList<Entry> fEntries;
 
 	private Goal(FList<Entry> elems) {
@@ -79,66 +25,49 @@ final class Goal implements Iterable<Goal.Entry> {
 
 	static Goal newInitialGoal(Clause initialGoal) {
 		if (!initialGoal.isQuery()) throw new IllegalArgumentException();
-
 		return newGoal(initialGoal, SLDBranch.NULL);
 	}
 
 	static Goal newGoal(Clause goal, SLDBranch cutPoint) {
-		FList<Entry> elems = flist();
-		FList<AtomicFormula> rest = goal.body();
+		var elems = FList.<Entry>flist();
+		var rest = goal.body();
 		while (!rest.isEmpty()) {
 			boolean forkSuppressiveZone = rest.contains(AtomicFormula.CUT);
-
-			AtomicFormula subGoal = rest.head();
+			var subGoal = rest.head();
 			rest = rest.tail();
 
-			SLDBranch cp = null;
-			if (subGoal.isCut()) cp = cutPoint;
-
-			Entry elem = new Entry(subGoal, cp, forkSuppressiveZone);
-			elems = cons(elem, elems);
+			SLDBranch cp = subGoal.isCut() ? cutPoint : null;
+			elems = cons(new Entry(subGoal, cp, forkSuppressiveZone), elems);
 		}
-
 		return new Goal(elems.reverse());
 	}
 
+	@Override
 	public Iterator<Goal.Entry> iterator() {
 		return fEntries.iterator();
 	}
 
-	Goal nextGoal(
-			Clause unified, Map<Variable, ? extends Term> mgu,
-			SLDBranch cutPoint) {
-		FList<Goal.Entry> entries = flist();
+	Goal nextGoal(Clause unified, Map<Variable, ? extends Term> mgu, SLDBranch cutPoint) {
+		var entries = FList.<Entry>flist();
 
-		Goal newGoal = Goal.newGoal(unified, cutPoint);
-		for (Goal.Entry ent : newGoal) {
+		for (var ent : Goal.newGoal(unified, cutPoint)) {
 			entries = cons(ent, entries);
 		}
 
-		Goal restGoal = pop().get2nd();
-		for (Goal.Entry ent : restGoal) {
-			AtomicFormula sg = Instances.getInstance(ent.getSubGoal(), mgu);
-			entries = cons(
-					new Goal.Entry(
-					sg, ent.getCutPoint(),
-					ent.isForkSuppressiveZone()), entries);
+		for (var ent : pop().get2nd()) {
+			var sg = Instances.getInstance(ent.subGoal(), mgu);
+			entries = cons(new Entry(sg, ent.cutPoint(), ent.forkSuppressiveZone()), entries);
 		}
 
 		return new Goal(entries.reverse());
 	}
 
 	Pair<Entry, Goal> pop() {
-		Entry popped = fEntries.head();
-		FList<Entry> rest = fEntries.tail();
-
-		return Pair.newPair(popped, new Goal(rest));
+		return Pair.newPair(fEntries.head(), new Goal(fEntries.tail()));
 	}
 
 	Entry peek() {
-		if (fEntries.isEmpty()) return null;
-
-		return fEntries.head();
+		return fEntries.isEmpty() ? null : fEntries.head();
 	}
 
 	boolean isEmpty() {
@@ -146,27 +75,21 @@ final class Goal implements Iterable<Goal.Entry> {
 	}
 
 	Clause toClause() {
-		FList<AtomicFormula> body = toSubGoals();
-		return Clause.query(body);
+		return Clause.query(toSubGoals());
 	}
 
 	FList<AtomicFormula> toSubGoals() {
-		FList<AtomicFormula> subGoals = flist();
-		for (Entry elem : fEntries) {
-			subGoals = cons(elem.getSubGoal(), subGoals);
+		var subGoals = FList.<AtomicFormula>flist();
+		for (var elem : fEntries) {
+			subGoals = cons(elem.subGoal(), subGoals);
 		}
-
 		return subGoals.reverse();
 	}
 
 	@Override
 	public boolean equals(Object obj) {
-		if (obj == null) return false;
 		if (obj == this) return true;
-		if (!(obj instanceof Goal)) return false;
-
-		Goal rhs = (Goal) obj;
-
+		if (!(obj instanceof Goal rhs)) return false;
 		return Objects.equals(fEntries, rhs.fEntries);
 	}
 

@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package jp.nhiguchi.libs.logpro.reasoning.sld;
 
 import java.util.*;
@@ -9,11 +5,6 @@ import java.util.*;
 import jp.nhiguchi.libs.logpro.program.formula.*;
 import jp.nhiguchi.libs.logpro.program.term.*;
 
-/**
- * Immutable.
- *
- * @author Naoshi Higuchi
- */
 final class Variant {
 	private final Clause fInstance;
 	private final Map<Variable, Variable> fSubstitute;
@@ -32,23 +23,22 @@ final class Variant {
 	}
 
 	static Variant create(Clause clause, Clause goal) {
-		assert (goal.isQuery());
+		assert goal.isQuery();
 
-		Set<Variable> vars = Util.collectVariables(clause);
-		Set<Variable> existingVars = Util.collectVariables(goal);
-
-		Map<Variable, Variable> substitute = getSubstitute(vars, existingVars);
+		var vars = Util.collectVariables(clause);
+		var existingVars = Util.collectVariables(goal);
+		var substitute = getSubstitute(vars, existingVars);
 
 		return new Variant(clause, substitute);
 	}
 
-	private static Map<Variable, Variable> getSubstitute(Set<Variable> vars, Set<Variable> existingVars) {
-		Map<Variable, Variable> map = new HashMap<Variable, Variable>();
+	private static Map<Variable, Variable> getSubstitute(
+			Set<Variable> vars, Set<Variable> existingVars) {
+		var map = new HashMap<Variable, Variable>();
 
-		for (Variable var : vars) {
-			if (existingVars.contains(var)) {
-				Variable renamed = rename(var, existingVars);
-				map.put(var, renamed);
+		for (var var_ : vars) {
+			if (existingVars.contains(var_)) {
+				map.put(var_, rename(var_, existingVars));
 			}
 		}
 
@@ -56,13 +46,10 @@ final class Variant {
 	}
 
 	private static Variable rename(Variable var, Set<Variable> existingVars) {
-		Variable renamed;
-
 		int i = 0;
+		Variable renamed;
 		do {
-			String name = String.format("_%s%d", var.name(), i);
-			renamed = Variable.create(name);
-			++i;
+			renamed = Variable.create("_%s%d".formatted(var.name(), i++));
 		} while (existingVars.contains(renamed));
 
 		return renamed;
@@ -70,11 +57,8 @@ final class Variant {
 
 	@Override
 	public boolean equals(Object obj) {
-		if (obj == null) return false;
 		if (obj == this) return true;
-		if (!(obj instanceof Variant)) return false;
-
-		Variant rhs = (Variant) obj;
+		if (!(obj instanceof Variant rhs)) return false;
 
 		return Objects.equals(fInstance, rhs.fInstance)
 				&& Objects.equals(fSubstitute, rhs.fSubstitute);
@@ -82,14 +66,11 @@ final class Variant {
 
 	@Override
 	public int hashCode() {
-		return Objects.hashCode(fInstance)
-				+ Objects.hashCode(fSubstitute);
+		return Objects.hashCode(fInstance) + Objects.hashCode(fSubstitute);
 	}
 
 	@Override
 	public String toString() {
-		return String.format(
-				"Variant(instance=%s, substitute=%s)",
-				fInstance, fSubstitute);
+		return "Variant(instance=%s, substitute=%s)".formatted(fInstance, fSubstitute);
 	}
 }
