@@ -12,12 +12,12 @@ import jp.nhiguchi.libs.logpro.program.formula.*;
 import jp.nhiguchi.libs.logpro.program.term.*;
 import static jp.nhiguchi.libs.logpro.program.SimpleParser.*;
 
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
-import static org.junit.Assert.*;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  *
@@ -41,7 +41,7 @@ public class SLDTest {
 	public SLDTest() {
 	}
 
-	@BeforeClass
+	@BeforeAll
 	public static void setUpClass() throws Exception {
 		setUpProgFamily();
 		setUpProgWithCut();
@@ -167,15 +167,15 @@ public class SLDTest {
 		fProgWith0ArgLiteral = builder.toProgram();
 	}
 
-	@AfterClass
+	@AfterAll
 	public static void tearDownClass() throws Exception {
 	}
 
-	@Before
+	@BeforeEach
 	public void setUp() {
 	}
 
-	@After
+	@AfterEach
 	public void tearDown() {
 	}
 

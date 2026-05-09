@@ -13,12 +13,12 @@ import static jp.nhiguchi.libs.logpro.program.SimpleParser.*;
 
 import static jp.nhiguchi.libs.logpro.reasoning.sld.Solver.Solution;
 
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
-import static org.junit.Assert.*;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  *
@@ -31,7 +31,7 @@ public class SolverTest {
 	public SolverTest() {
 	}
 
-	@BeforeClass
+	@BeforeAll
 	public static void setUpClass() throws Exception {
 		setUpProgFamily();
 		setUpProgGeom();
@@ -75,15 +75,15 @@ public class SolverTest {
 		fProgGeom = builder.toProgram();
 	}
 
-	@AfterClass
+	@AfterAll
 	public static void tearDownClass() throws Exception {
 	}
 
-	@Before
+	@BeforeEach
 	public void setUp() {
 	}
 
-	@After
+	@AfterEach
 	public void tearDown() {
 	}
 
