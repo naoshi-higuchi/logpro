@@ -151,4 +151,4 @@ jp.nhiguchi.libs.logpro
 
 ## License
 
-See [LICENSE](LICENSE) if present, or contact the author.
+Released under the [MIT License](LICENSE).
