@@ -136,10 +136,12 @@ public class SimpleParserTest {
 
 		expResult = AtomicFormula.CUT;
 		result = SimpleParser.literal("!");
+		assertEquals(expResult, result);
 
 		expResult = AtomicFormula.create(
 				Predicate.create("void", 0));
 		result = SimpleParser.literal("void");
+		assertEquals(expResult, result);
 	}
 
 	/**
@@ -160,6 +162,8 @@ public class SimpleParserTest {
 		expResult = Clause.fact(
 				AtomicFormula.create(
 				Predicate.create("void", 0)));
+		result = SimpleParser.fact("void.");
+		assertEquals(expResult, result);
 	}
 
 	/**
