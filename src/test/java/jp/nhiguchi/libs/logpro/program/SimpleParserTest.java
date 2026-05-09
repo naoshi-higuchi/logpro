@@ -184,6 +184,54 @@ public class SimpleParserTest {
 		assertEquals(expResult, result);
 	}
 
+	@Test
+	public void testCompoundTerm_invalid() {
+		// Plain atom without args is not a compound term
+		assertThrows(IllegalArgumentException.class, () -> SimpleParser.compoundTerm("ann"));
+		// Variable is not a compound term
+		assertThrows(IllegalArgumentException.class, () -> SimpleParser.compoundTerm("X"));
+		// Missing closing parenthesis
+		assertThrows(IllegalArgumentException.class, () -> SimpleParser.compoundTerm("foo(a, b"));
+	}
+
+	@Test
+	public void testTerm_invalid() {
+		assertThrows(IllegalArgumentException.class, () -> SimpleParser.term(""));
+		assertThrows(IllegalArgumentException.class, () -> SimpleParser.term("123"));
+		assertThrows(IllegalArgumentException.class, () -> SimpleParser.term("!"));
+	}
+
+	@Test
+	public void testFact_invalid() {
+		// Missing period
+		assertThrows(IllegalArgumentException.class, () -> SimpleParser.fact("parent(ann, bob)"));
+		// Uppercase head is a variable, not a predicate
+		assertThrows(IllegalArgumentException.class, () -> SimpleParser.fact("Parent(ann)."));
+		// Empty string
+		assertThrows(IllegalArgumentException.class, () -> SimpleParser.fact(""));
+	}
+
+	@Test
+	public void testQuery_invalid() {
+		// Missing ?-
+		assertThrows(IllegalArgumentException.class, () -> SimpleParser.query("parent(ann, bob)."));
+		// Missing period
+		assertThrows(IllegalArgumentException.class, () -> SimpleParser.query("?- parent(ann, bob)"));
+		// Empty string
+		assertThrows(IllegalArgumentException.class, () -> SimpleParser.query(""));
+	}
+
+	@Test
+	public void testClause_invalid() {
+		// Fact syntax (no :-) is not a rule
+		assertThrows(IllegalArgumentException.class, () -> SimpleParser.clause("mother(X, Y)."));
+		// Missing period
+		assertThrows(IllegalArgumentException.class,
+				() -> SimpleParser.clause("mother(X, Y) :- parent(X, Y)"));
+		// No head
+		assertThrows(IllegalArgumentException.class, () -> SimpleParser.clause(":- parent(X, Y)."));
+	}
+
 	/**
 	 * Test of clause method, of class SimpleParser2.
 	 */
