@@ -35,7 +35,7 @@ public class SLDTest {
 		int nCPUs = Runtime.getRuntime().availableProcessors();
 		System.out.println("availableProcessors: " + nCPUs);
 		//fExecSrv = Executors.newFixedThreadPool(nCPUs);
-		fExecSrv = new ThreadPoolExecutor(nCPUs, nCPUs, 7L, TimeUnit.SECONDS, new BlockingLIFOQueue());
+		fExecSrv = new ThreadPoolExecutor(nCPUs, nCPUs, 7L, TimeUnit.SECONDS, new BlockingLIFOQueue<Runnable>());
 	}
 
 	public SLDTest() {
@@ -192,35 +192,13 @@ public class SLDTest {
 
 		program = fProgFamily;
 		query = query("?- predecessor(X, gene).");
-		expResult = new HashSet<Map<Variable, Term>>() {
-			{
-				add(new HashMap<Variable, Term>() {
-					{
-						put(variable("X"), term("ann"));
-					}
-				});
-				add(new HashMap<Variable, Term>() {
-					{
-						put(variable("X"), term("bob"));
-					}
-				});
-				add(new HashMap<Variable, Term>() {
-					{
-						put(variable("X"), term("cate"));
-					}
-				});
-				add(new HashMap<Variable, Term>() {
-					{
-						put(variable("X"), term("elen"));
-					}
-				});
-				add(new HashMap<Variable, Term>() {
-					{
-						put(variable("X"), term("fred"));
-					}
-				});
-			}
-		};
+		expResult = Set.of(
+				Map.of(variable("X"), term("ann")),
+				Map.of(variable("X"), term("bob")),
+				Map.of(variable("X"), term("cate")),
+				Map.of(variable("X"), term("elen")),
+				Map.of(variable("X"), term("fred"))
+		);
 
 		Iterable<Map<Variable, Term>> it = SLD.solve(program, query);
 		result = new HashSet<Map<Variable, Term>>();
@@ -243,11 +221,7 @@ public class SLDTest {
 
 		program = fProgFamily;
 		query = query("?- sister(X, dan).");
-		expResult = new HashMap<Variable, Term>() {
-			{
-				put(variable("X"), term("elen"));
-			}
-		};
+		expResult = Map.of(variable("X"), term("elen"));
 		result = SLD.solveOne(program, query);
 		assertEquals(expResult, result);
 	}
@@ -278,35 +252,13 @@ public class SLDTest {
 
 		program = fProgFamily;
 		query = query("?- predecessor(X, gene).");
-		expResult = new HashSet<Map<Variable, Term>>() {
-			{
-				add(new HashMap<Variable, Term>() {
-					{
-						put(variable("X"), term("ann"));
-					}
-				});
-				add(new HashMap<Variable, Term>() {
-					{
-						put(variable("X"), term("bob"));
-					}
-				});
-				add(new HashMap<Variable, Term>() {
-					{
-						put(variable("X"), term("cate"));
-					}
-				});
-				add(new HashMap<Variable, Term>() {
-					{
-						put(variable("X"), term("elen"));
-					}
-				});
-				add(new HashMap<Variable, Term>() {
-					{
-						put(variable("X"), term("fred"));
-					}
-				});
-			}
-		};
+		expResult = Set.of(
+				Map.of(variable("X"), term("ann")),
+				Map.of(variable("X"), term("bob")),
+				Map.of(variable("X"), term("cate")),
+				Map.of(variable("X"), term("elen")),
+				Map.of(variable("X"), term("fred"))
+		);
 		solveAllAndAssert(program, query, expResult);
 	}
 
@@ -319,39 +271,17 @@ public class SLDTest {
 		Program program;
 		Clause query;
 		Set<Map<Variable, Term>> expResult;
-		Set result;
+		Set<Map<Variable, Term>> result;
 
 		program = fProgFamily;
 		query = query("?- predecessor(X, gene).");
-		expResult = new HashSet<Map<Variable, Term>>() {
-			{
-				add(new HashMap<Variable, Term>() {
-					{
-						put(variable("X"), term("ann"));
-					}
-				});
-				add(new HashMap<Variable, Term>() {
-					{
-						put(variable("X"), term("bob"));
-					}
-				});
-				add(new HashMap<Variable, Term>() {
-					{
-						put(variable("X"), term("cate"));
-					}
-				});
-				add(new HashMap<Variable, Term>() {
-					{
-						put(variable("X"), term("elen"));
-					}
-				});
-				add(new HashMap<Variable, Term>() {
-					{
-						put(variable("X"), term("fred"));
-					}
-				});
-			}
-		};
+		expResult = Set.of(
+				Map.of(variable("X"), term("ann")),
+				Map.of(variable("X"), term("bob")),
+				Map.of(variable("X"), term("cate")),
+				Map.of(variable("X"), term("elen")),
+				Map.of(variable("X"), term("fred"))
+		);
 
 		long startTime;
 		long estimatedTime;
@@ -385,51 +315,23 @@ public class SLDTest {
 
 		program = fProgWithCut;
 		query = query("?- p(X).");
-		expResult = new HashSet<Map<Variable, Term>>() {
-			{
-				add(new HashMap<Variable, Term>() {
-					{
-						put(variable("X"), term("a"));
-					}
-				});
-			}
-		};
+		expResult = Set.of(Map.of(variable("X"), term("a")));
 		solveAllAndAssert(program, query, expResult);
 
 		program = fProgWithCut;
 		query = query("?- p2(X).");
-		expResult = new HashSet<Map<Variable, Term>>() {
-			{
-				add(new HashMap<Variable, Term>() {
-					{
-						put(variable("X"), term("a"));
-					}
-				});
-				add(new HashMap<Variable, Term>() {
-					{
-						put(variable("X"), term("b"));
-					}
-				});
-			}
-		};
+		expResult = Set.of(
+				Map.of(variable("X"), term("a")),
+				Map.of(variable("X"), term("b"))
+		);
 		solveAllAndAssert(program, query, expResult);
 
 		program = fProgWithCut;
 		query = query("?- p3(X).");
-		expResult = new HashSet<Map<Variable, Term>>() {
-			{
-				add(new HashMap<Variable, Term>() {
-					{
-						put(variable("X"), term("a"));
-					}
-				});
-				add(new HashMap<Variable, Term>() {
-					{
-						put(variable("X"), term("b"));
-					}
-				});
-			}
-		};
+		expResult = Set.of(
+				Map.of(variable("X"), term("a")),
+				Map.of(variable("X"), term("b"))
+		);
 		for (int i = 0; i < NLOOP; ++i) {
 			assertFalse(expResult.equals(SLD.solveAll(program, query, fExecSrv)));
 		}
@@ -442,48 +344,20 @@ public class SLDTest {
 
 		program = fProgWithCut;
 		query = query("?- f(b, Y).");
-		expResult = new HashSet<Map<Variable, Term>>() {
-			{
-				add(new HashMap<Variable, Term>() {
-					{
-						put(variable("Y"), term("two"));
-					}
-				});
-			}
-		};
+		expResult = Set.of(Map.of(variable("Y"), term("two")));
 		solveAllAndAssert(program, query, expResult);
 
 		program = fProgWithCut;
 		query = query("?- f2(c, Y).");
-		expResult = new HashSet<Map<Variable, Term>>() {
-			{
-				add(new HashMap<Variable, Term>() {
-					{
-						put(variable("Y"), term("three"));
-					}
-				});
-			}
-		};
+		expResult = Set.of(Map.of(variable("Y"), term("three")));
 		solveAllAndAssert(program, query, expResult);
 
 		program = fProgWithCut;
 		query = query("?- f3(X, Y).");
-		expResult = new HashSet<Map<Variable, Term>>() {
-			{
-				add(new HashMap<Variable, Term>() {
-					{
-						put(variable("X"), term("a"));
-						put(variable("Y"), term("c"));
-					}
-				});
-				add(new HashMap<Variable, Term>() {
-					{
-						put(variable("X"), term("b"));
-						put(variable("Y"), term("c"));
-					}
-				});
-			}
-		};
+		expResult = Set.of(
+				Map.of(variable("X"), term("a"), variable("Y"), term("c")),
+				Map.of(variable("X"), term("b"), variable("Y"), term("c"))
+		);
 		solveAllAndAssert(program, query, expResult);
 	}
 
@@ -499,25 +373,11 @@ public class SLDTest {
 
 		program = fProgWithLoop;
 		query = query("?- path(a, X).");
-		expResult = new HashSet<Map<Variable, Term>>() {
-			{
-				add(new HashMap<Variable, Term>() {
-					{
-						put(variable("X"), term("a"));
-					}
-				});
-				add(new HashMap<Variable, Term>() {
-					{
-						put(variable("X"), term("b"));
-					}
-				});
-				add(new HashMap<Variable, Term>() {
-					{
-						put(variable("X"), term("c"));
-					}
-				});
-			}
-		};
+		expResult = Set.of(
+				Map.of(variable("X"), term("a")),
+				Map.of(variable("X"), term("b")),
+				Map.of(variable("X"), term("c"))
+		);
 		solveAllAndAssert(program, query, expResult);
 	}
 
@@ -547,11 +407,7 @@ public class SLDTest {
 		program = fProgWith0ArgLiteral;
 		query = query("?- literalWith0Arg.");
 		// A ground query with no variables that succeeds yields one empty substitution
-		expResult = new HashSet<Map<Variable, Term>>() {
-			{
-				add(new HashMap<Variable, Term>());
-			}
-		};
+		expResult = Set.of(Collections.emptyMap());
 		solveAllAndAssert(program, query, expResult);
 	}
 }

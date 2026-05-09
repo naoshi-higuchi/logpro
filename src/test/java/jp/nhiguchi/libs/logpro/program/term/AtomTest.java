@@ -48,7 +48,7 @@ public class AtomTest {
 		result = Atom.create(value);
 		assertEquals(value, result.value());
 
-		value = new Integer(123);
+		value = 123;
 		result = Atom.create(value);
 		assertEquals(value, result.value());
 	}
