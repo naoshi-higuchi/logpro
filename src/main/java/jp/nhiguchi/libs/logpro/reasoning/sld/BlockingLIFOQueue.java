@@ -4,6 +4,16 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.concurrent.*;
 
+/**
+ * A thread-safe blocking queue with LIFO (last-in, first-out) ordering.
+ *
+ * <p>Elements are inserted and removed from the front (head) of the underlying
+ * {@link LinkedBlockingDeque}, giving stack-like LIFO behaviour.
+ * This ordering makes the parallel SLD solver prefer depth-first exploration,
+ * which reduces memory usage compared to FIFO (breadth-first) ordering.
+ *
+ * @param <E> the type of elements held in this queue
+ */
 public final class BlockingLIFOQueue<E> implements BlockingQueue<E> {
 	private final BlockingDeque<E> fDeque = new LinkedBlockingDeque<>();
 
